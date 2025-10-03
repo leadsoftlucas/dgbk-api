@@ -12,8 +12,12 @@ namespace LucasRT.DGBK.RestApi.Domain.ValuedObjects
             Created,
             [Description("Capturado")]
             Captured,
-            [Description("Reembolsado")]
-            Refunded,
+            [Description("Parcialmente Reembolsado")]
+            PartialRefunded,
+            [Description("Totalmente Reembolsado")]
+            FullRefunded,
+            [Description("Reembolso falhou")]
+            RefundFailed,
             [Description("Falhou")]
             Failed
         }
@@ -24,16 +28,6 @@ namespace LucasRT.DGBK.RestApi.Domain.ValuedObjects
             Created,
             [Description("Bem-sucedido")]
             Succeeded,
-            [Description("Falhou")]
-            Failed
-        }
-
-        public enum WebhookStatus
-        {
-            [Description("Pendente")]
-            Pending,
-            [Description("Entregue")]
-            Delivered,
             [Description("Falhou")]
             Failed
         }

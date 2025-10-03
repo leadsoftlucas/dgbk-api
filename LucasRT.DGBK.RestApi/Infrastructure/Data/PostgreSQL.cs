@@ -1,7 +1,7 @@
 ﻿using LucasRT.DGBK.RestApi.Domain.Entities.Payments;
 using LucasRT.DGBK.RestApi.Domain.Entities.Refunds;
+using LucasRT.DGBK.RestApi.Infrastructure.Data.Persistence.Payments;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace LucasRT.DGBK.RestApi.Infrastructure.Data
@@ -16,6 +16,11 @@ namespace LucasRT.DGBK.RestApi.Infrastructure.Data
 
         public PostgreSQL(DbContextOptions<PostgreSQL> options) : base(options)
         {
+        }
+
+        public PostgreSQL(IConfiguration configuration) : base()
+        {
+            _Configuration = configuration;
         }
 
         public PostgreSQL(IConfiguration configuration, DbContextOptions<PostgreSQL> options) : base(options)
@@ -41,6 +46,10 @@ namespace LucasRT.DGBK.RestApi.Infrastructure.Data
                     .Where(p => p.ClrType.IsEnum)))
                 property.SetColumnType("varchar(50)");
 
+            modelBuilder.ApplyConfiguration(new PaymentsConfig());
+            modelBuilder.ApplyConfiguration(new PaymentStatusHistoryConfig());
+            modelBuilder.ApplyConfiguration(new RefundsConfig());
+
             base.OnModelCreating(modelBuilder);
         }
 
@@ -60,9 +69,9 @@ namespace LucasRT.DGBK.RestApi.Infrastructure.Data
                 .AddJsonFile("appsettings.Development.json", optional: false)
                 .Build();
 
-            var connectionString = configuration.GetConnectionString("PostgreSQL");
+            string connectionString = configuration.GetConnectionString("PostgreSQL");
 
-            var optionsBuilder = new DbContextOptionsBuilder<PostgreSQL>();
+            DbContextOptionsBuilder<PostgreSQL> optionsBuilder = new();
             optionsBuilder.UseNpgsql(connectionString);
 
             return new PostgreSQL(optionsBuilder.Options);

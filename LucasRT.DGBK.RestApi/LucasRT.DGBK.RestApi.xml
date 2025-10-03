@@ -26,18 +26,49 @@
             <summary>
             Provides functionality to generate HMAC-SHA256 signatures.
             </summary>
-            <remarks>This class is designed to create secure signatures for data using a secret key and a
-            timestamp. It is typically used in scenarios where data integrity and authenticity need to be
-            verified.</remarks>
+            <remarks>This class is designed to create secure signatures for data using a secret key and a timestamp. It is typically used in scenarios where data integrity and authenticity need to be verified.</remarks>
         </member>
-        <member name="M:LucasRT.DGBK.RestApi.Infrastructure.HmacSigner.Sign(System.String,System.String,System.String)">
+        <member name="M:LucasRT.DGBK.RestApi.Infrastructure.HmacSigner.SignHmac(System.String,System.Int64@)">
             <summary>
             Generates a hexadecimal signature for the given input using HMAC-SHA256.
             </summary>
-            <param name="secret">The secret key used for generating the HMAC signature. Cannot be null or empty.</param>
-            <param name="timestamp">The timestamp to include in the signature. Represents the time at which the signature is generated.</param>
-            <param name="body">The body content to include in the signature. Represents the data to be signed.</param>
             <returns>A lowercase hexadecimal string representing the HMAC-SHA256 signature of the combined timestamp and body.</returns>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Infrastructure.HmacSigner.VerifyHmac(System.String,System.String,System.String)">
+            <summary>
+            Verifies the HMAC signature of the provided message body using the specified signature header and timestamp.
+            </summary>
+            <remarks>This method uses the HMACSHA256 algorithm to compute the hash of the concatenated
+            timestamp and body. The computed hash is compared to the signature provided in the signature header using a
+            constant-time comparison to prevent timing attacks.</remarks>
+            <param name="body">The message body to verify.</param>
+            <param name="signatureHeader">The signature header containing the HMAC signature to verify.  Must start with "sha256=" followed by the
+            hexadecimal signature.</param>
+            <param name="timestamp">The timestamp used in the HMAC calculation.</param>
+            <returns><see langword="true"/> if the HMAC signature is valid; otherwise, <see langword="false"/>.</returns>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Infrastructure.HmacSigner.ConstantTimeEquals(System.String,System.String)">
+            <summary>
+            Compares two strings for equality in a manner that is resistant to timing attacks.
+            </summary>
+            <remarks>This method performs a constant-time comparison, meaning it takes the same amount of
+            time to compare two strings regardless of their content, which helps prevent timing attacks. Both strings
+            must be of the same length to be considered equal.</remarks>
+            <param name="a">The first string to compare. Must not be null.</param>
+            <param name="b">The second string to compare. Must not be null.</param>
+            <returns><see langword="true"/> if the strings are equal; otherwise, <see langword="false"/>.</returns>
+        </member>
+        <member name="T:LucasRT.DGBK.RestApi.Migrations.InitialMigration">
+            <inheritdoc />
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Migrations.InitialMigration.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Migrations.InitialMigration.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Migrations.InitialMigration.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
         </member>
     </members>
 </doc>

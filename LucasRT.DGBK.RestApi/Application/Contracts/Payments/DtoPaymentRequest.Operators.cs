@@ -5,8 +5,6 @@ namespace LucasRT.DGBK.RestApi.Application.Contracts.Payments
     public partial class DtoPaymentRequest
     {
         public static implicit operator Payment(DtoPaymentRequest request)
-        {
-            return new Payment(request.PixKey, request.Amount);
-        }
+            => new(request.PixKey, request.Amount, request.GetTransactionId());
     }
 }

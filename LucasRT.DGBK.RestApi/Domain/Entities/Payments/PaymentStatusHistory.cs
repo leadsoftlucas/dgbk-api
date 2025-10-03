@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
 using static LucasRT.DGBK.RestApi.Domain.ValuedObjects.Enums;
 
 namespace LucasRT.DGBK.RestApi.Domain.Entities.Payments
 {
-    [Table("Payment")]
+    [Table("PaymentStatusHistories")]
     public partial class PaymentStatusHistory
     {
         public Guid Id { get; set; }
@@ -12,6 +13,7 @@ namespace LucasRT.DGBK.RestApi.Domain.Entities.Payments
         public string? Reason { get; set; }
         public DateTimeOffset At { get; set; }
 
+        [IgnoreDataMember]
         public Payment? Payment { get; set; }
     }
 }

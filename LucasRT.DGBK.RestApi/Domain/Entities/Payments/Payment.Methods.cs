@@ -10,53 +10,80 @@ namespace LucasRT.DGBK.RestApi.Domain.Entities.Payments
         {
         }
 
-        public Payment(string pixKey, decimal amount)
+        public Payment(string pixKey, decimal amount, Guid transactionId)
         {
             Id = Guid.NewGuid();
+            TransactionId = transactionId;
             PixKey = pixKey;
             Amount = amount;
 
             AppendHistory(PaymentStatus.Created, PaymentStatus.Created.GetDescription());
         }
 
-        public void Capture()
+        public PaymentStatusHistory Capture()
         {
-            if (Status is PaymentStatus.Failed or PaymentStatus.Refunded) throw new InvalidOperationException("Invalid state");
+            if (Status is not PaymentStatus.Created)
+                throw new InvalidOperationException("Invalid state");
 
             Status = PaymentStatus.Captured;
             CapturedAt = DateTimeOffset.UtcNow;
-            AppendHistory(Status, Status.GetDescription());
+            NextAttemptAt = null;
+            DeadlineAt = null;
+
+            return AppendHistory(Status, Status.GetDescription());
         }
 
-        public Refund Refund(decimal amount)
+        public PaymentStatusHistory Refund(Refund refund)
         {
-            //if (Status is PaymentStatus.Failed) throw new InvalidOperationException("Cannot refund failed payment");
-            //if (amount <= 0 || amount + RefundedAmount > Amount.Value) throw new InvalidOperationException("Invalid refund amount");
+            if (Status is not PaymentStatus.Captured or PaymentStatus.FullRefunded)
+                throw new InvalidOperationException("Cannot refund uncaptured, failed or already fully refunded payment.");
 
-            //RefundedAmount += amount;
-            //if (RefundedAmount == Amount.Value) { Status = PaymentStatus.Refunded; AppendHistory(Status, "fully refunded"); }
+            if (refund.Status is not RefundStatus.Succeeded)
+                throw new InvalidOperationException("Cannot refund pending or failed refund.");
 
-            //return Refund.Create(this.Id, new Money(amount, Amount.Currency));
+            RefundedAmount += refund.Amount;
+            Status = RefundedAmount == Amount ? PaymentStatus.FullRefunded : PaymentStatus.PartialRefunded;
+            NextAttemptAt = null;
+            DeadlineAt = null;
 
-            return null;
+            return AppendHistory(Status, $"{Status.GetDescription()}: Total: {Amount} | Refunded :{RefundedAmount}");
         }
 
-        public void MarkFailed(string reason)
+        public PaymentStatusHistory MarkRefundFailed(string reason, DateTimeOffset nextAttempt)
         {
+            if (!DeadlineAt.HasValue)
+                DeadlineAt = DateTimeOffset.UtcNow.AddHours(24);
+
+            NextAttemptAt = nextAttempt < DeadlineAt ? nextAttempt : DeadlineAt;
+
+            return AppendHistory(PaymentStatus.RefundFailed, reason);
+        }
+
+        public PaymentStatusHistory MarkPaymentFailed(string reason, DateTimeOffset nextAttempt)
+        {
+            if (!DeadlineAt.HasValue)
+                DeadlineAt = DateTimeOffset.UtcNow.AddHours(24);
+
+            NextAttemptAt = nextAttempt < DeadlineAt ? nextAttempt : DeadlineAt;
+
             Status = PaymentStatus.Failed;
-            AppendHistory(Status, reason);
+            return AppendHistory(Status, reason);
         }
 
-        private void AppendHistory(PaymentStatus status, string? reason)
+        private PaymentStatusHistory AppendHistory(PaymentStatus status, string? reason)
         {
-            _history.Add(new PaymentStatusHistory
+            PaymentStatusHistory sh = new()
             {
                 Id = Guid.NewGuid(),
                 PaymentId = this.Id,
                 Status = status,
                 Reason = reason,
                 At = DateTimeOffset.UtcNow
-            });
+            };
+
+            _history.Add(sh);
+
+            return sh;
         }
     }
 }

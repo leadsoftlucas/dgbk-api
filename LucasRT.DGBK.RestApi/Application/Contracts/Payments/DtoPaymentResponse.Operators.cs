@@ -12,11 +12,14 @@ namespace LucasRT.DGBK.RestApi.Application.Contracts.Payments
             return new DtoPaymentResponse
             {
                 Id = payment.Id,
+                TransactionId = payment.TransactionId,
                 PixKey = payment.PixKey,
                 Amount = payment.Amount,
-                Status = payment.Status,
+                RefundedAmount = payment.RefundedAmount,
+                PaymentStatus = payment.Status,
                 CreatedAt = payment.CreatedAt,
-                CapturedAt = payment.CapturedAt
+                CapturedAt = payment.CapturedAt,
+                History = (bool)(payment.History?.Any()) ? payment.History.Select(h => (DtoPaymentHistory)h).ToList() : []
             };
         }
     }

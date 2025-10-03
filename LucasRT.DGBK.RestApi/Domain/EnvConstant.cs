@@ -1,0 +1,8 @@
+﻿namespace LucasRT.DGBK.RestApi.Domain
+{
+    public static class EnvConstant
+    {
+        public const string HMAC = "HMAC";
+        public const string Webhook_Endpoint = "WEBHOOK_ENDPOINT";
+    }
+}

@@ -6,11 +6,11 @@
 
         public PostgreSQL GetDbContext() => _DBContext;
 
+        public async Task<bool> CommitDataContextAsync(CancellationToken ct)
+            => await _DBContext.SaveChangesAsync(ct) > 0;
+
         public async Task<bool> CommitDataContextAsync()
-        {
-            var success = await _DBContext.SaveChangesAsync() > 0;
-            return success;
-        }
+            => await _DBContext.SaveChangesAsync() > 0;
 
         public void Dispose()
         {
@@ -21,6 +21,7 @@
     public interface IUnitOfWork : IDisposable
     {
         PostgreSQL GetDbContext();
+        Task<bool> CommitDataContextAsync(CancellationToken ct);
         Task<bool> CommitDataContextAsync();
     }
 }

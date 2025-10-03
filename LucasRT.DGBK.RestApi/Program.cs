@@ -1,6 +1,8 @@
 using LucasRT.DGBK.RestApi.Application.Services;
 using LucasRT.DGBK.RestApi.Configurations;
-using LucasRT.DGBK.RestApi.Infrastructure.Data.Repositories;
+using LucasRT.DGBK.RestApi.Infrastructure.Data;
+using LucasRT.DGBK.RestApi.Workers;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -16,8 +18,10 @@ builder.Services.AddSwaggerConfig();
 
 builder.Services.AddDistributedMemoryCache();
 
-builder.Services.AddRepositories();
 builder.Services.AddServices();
+
+builder.Services.AddHostedService<PaymentWebhookDeliveryWorker>();
+builder.Services.AddHostedService<RefundWebhookDeliveryWorker>();
 
 WebApplication app = builder.Build();
 
@@ -46,9 +50,9 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
 
-//using var scope = app.Services.CreateScope();
-//var db = scope.ServiceProvider.GetRequiredService<PostgreSQL>();
-//db.Database.Migrate();
+using var scope = app.Services.CreateScope();
+var db = scope.ServiceProvider.GetRequiredService<PostgreSQL>();
+db.Database.Migrate();
 
 app.MapControllers();
 

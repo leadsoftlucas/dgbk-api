@@ -8,7 +8,9 @@
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5205",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "HMAC": "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ",
+        "WEBHOOK_ENDPOINT": "http://localhost:5205/api/"
       }
     },
     "https": {
@@ -18,7 +20,9 @@
       "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7077;http://localhost:5205",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "HMAC": "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ",
+        "WEBHOOK_ENDPOINT": "https://localhost:7077/api/"
       }
     }
   }
