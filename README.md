@@ -17,11 +17,17 @@ git clone git@github.com:leadsoftlucas/dgbk-api.git
 ```
 
 ## **Postgre SQL**
+
+- Branch: [postgresql](https://github.com/leadsoftlucas/dgbk-api/tree/postgresql)
+
 ```bash
 git checkout postgresql
 ```
 
 ## **RavenDB**
+
+- Branch: [ravendb](https://github.com/leadsoftlucas/dgbk-api/tree/ravendb)
+
 ```bash
 git checkout ravendb
 ```
