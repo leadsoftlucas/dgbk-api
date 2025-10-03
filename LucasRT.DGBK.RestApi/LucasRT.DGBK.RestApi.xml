@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LucasRT.DGBK.RestApi</name>
+    </assembly>
+    <members>
+        <member name="T:LucasRT.DGBK.RestApi.Configurations.SwaggerConfiguration">
+            <summary>
+            Provides extension methods for configuring Swagger in an ASP.NET Core application.
+            </summary>
+            <remarks>This class contains methods to integrate Swagger documentation generation into the
+            application's service collection. It enables features such as XML comments inclusion, custom schema IDs, and
+            annotations.</remarks>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Configurations.SwaggerConfiguration.AddSwaggerConfig(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Configures Swagger services for the application, enabling API documentation generation.
+            </summary>
+            <remarks>This method adds Swagger generation capabilities to the application's service
+            collection. It registers the Swagger documentation with metadata such as title, version, description, and
+            contact information. Additionally, it includes XML comments for API documentation, enables annotations, and
+            customizes schema IDs.</remarks>
+            <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to which Swagger services will be added.</param>
+        </member>
+        <member name="T:LucasRT.DGBK.RestApi.Infrastructure.HmacSigner">
+            <summary>
+            Provides functionality to generate HMAC-SHA256 signatures.
+            </summary>
+            <remarks>This class is designed to create secure signatures for data using a secret key and a
+            timestamp. It is typically used in scenarios where data integrity and authenticity need to be
+            verified.</remarks>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Infrastructure.HmacSigner.Sign(System.String,System.String,System.String)">
+            <summary>
+            Generates a hexadecimal signature for the given input using HMAC-SHA256.
+            </summary>
+            <param name="secret">The secret key used for generating the HMAC signature. Cannot be null or empty.</param>
+            <param name="timestamp">The timestamp to include in the signature. Represents the time at which the signature is generated.</param>
+            <param name="body">The body content to include in the signature. Represents the data to be signed.</param>
+            <returns>A lowercase hexadecimal string representing the HMAC-SHA256 signature of the combined timestamp and body.</returns>
+        </member>
+    </members>
+</doc>
