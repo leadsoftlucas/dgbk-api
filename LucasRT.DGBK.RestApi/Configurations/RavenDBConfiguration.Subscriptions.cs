@@ -50,12 +50,10 @@ namespace LucasRT.DGBK.RestApi.Configurations
             }
             catch (SubscriptionDoesNotExistException)
             {
-                DateTimeOffset now = DateTimeOffset.UtcNow;
                 await ravenDB.Subscriptions.CreateAsync(new SubscriptionCreationOptions<Payment>()
                 {
                     Name = PaymentsWorkerSubscriptionName,
-                    Filter = p => (p.Status == PaymentStatus.Created || p.Status == PaymentStatus.Failed) &&
-                                  (p.NextAttemptAt == null || p.NextAttemptAt <= now)
+                    Filter = p => (p.Status == PaymentStatus.Created || p.Status == PaymentStatus.Failed)
                 });
             }
 
@@ -76,13 +74,14 @@ namespace LucasRT.DGBK.RestApi.Configurations
             SubscriptionWorker<Payment> subscription = ravenDB.Subscriptions.GetSubscriptionWorker<Payment>(new SubscriptionWorkerOptions(PaymentsWorkerSubscriptionName));
             await subscription.Run(async batch =>
             {
+                DateTimeOffset now = DateTimeOffset.UtcNow;
                 using IAsyncDocumentSession session = batch.OpenAsyncSession();
                 using HttpClient httpClient = new()
                 {
                     BaseAddress = new(EnvUtil.Get(EnvConstant.Webhook_Endpoint))
                 };
 
-                foreach (Payment payment in batch.Items.Select(i => i.Result))
+                foreach (Payment payment in batch.Items.Where(p => (p.Result.NextAttemptAt == null || p.Result.NextAttemptAt <= now)).Select(i => i.Result))
                 {
                     DtoProcessPaymentRequest dtoRequest = new()
                     {
@@ -113,6 +112,7 @@ namespace LucasRT.DGBK.RestApi.Configurations
                         psh = PaymentStatusHistory.SchedulePaymentRetry(payment, ex.Message);
                     }
 
+                    session.Advanced.GetMetadataFor(payment)[Raven.Client.Constants.Documents.Metadata.Refresh] = DateTimeOffset.UtcNow.AddSeconds(10);
                     await session.StoreAsync(payment, payment.Id);
                 }
 
@@ -184,9 +184,7 @@ namespace LucasRT.DGBK.RestApi.Configurations
                                                        .Select(p => p.Id.ToGuid())
                                                        .Distinct();
 
-                IList<Refund> refunds = batch.Items.Where(i => i.Result.PaymentId.In(paymentIds))
-                                                   .Select(i => i.Result)
-                                                   .ToList();
+                IList<Refund> refunds = [.. batch.Items.Where(i => i.Result.PaymentId.In(paymentIds)).Select(i => i.Result)];
 
                 foreach (Refund refund in refunds)
                 {
@@ -225,6 +223,8 @@ namespace LucasRT.DGBK.RestApi.Configurations
                         psh = PaymentStatusHistory.ScheduleRefundRetry(payment, ex.Message);
                     }
 
+                    session.Advanced.GetMetadataFor(refund)[Raven.Client.Constants.Documents.Metadata.Refresh] = DateTimeOffset.UtcNow.AddSeconds(10);
+                    session.Advanced.GetMetadataFor(payment)[Raven.Client.Constants.Documents.Metadata.Refresh] = DateTimeOffset.UtcNow.AddSeconds(10);
                     await session.StoreAsync(refund, refund.Id);
                     await session.StoreAsync(payment, payment.Id);
                 }
