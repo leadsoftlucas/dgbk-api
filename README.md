@@ -1,6 +1,6 @@
 ## DGBK Rest Api
 
-Detalhamento técnico de exemplo de API Rest de integração de pagamento.
+Detalhamento técnico de exemplo de API Rest de integração de pagamento usando PosgreSQL e Entity Framework.
 
 > GitHub: [leadsoftlucas/dgbk-api](https://github.com/leadsoftlucas/dgbk-api)
 
@@ -16,6 +16,16 @@ Para iniciar, clone o repositório para sua máquina local usando o comando abai
 git clone git@github.com:leadsoftlucas/dgbk-api.git
 ```
 
+#### 1.2 **Branch Postgre SQL**
+
+Faça chaeckout na branch `postgresql` para seguir os passos abaixo:
+
+- Branch: [postgresql](https://github.com/leadsoftlucas/dgbk-api/tree/postgresql)
+
+```bash
+git checkout postgresql
+```
+
 Você pode abrir a solução no Visual Studio ou qualquer outra IDE de sua escolha. Antes de executar a aplicação, certifique-se de ter as dependências necessárias instaladas.
 Você deve configurar as variáveis de ambiente para que a aplicação seja executada corretamente.
 
@@ -23,25 +33,29 @@ Você deve configurar as variáveis de ambiente para que a aplicação seja exec
 
 ```json
 "environmentVariables": {
-    "ASPNETCORE_ENVIRONMENT": "Development"
+    "ASPNETCORE_ENVIRONMENT": "Development",
+    "HMAC": "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ",
+    "WEBHOOK_ENDPOINT": "https://localhost:7077/api/"
 }
 ```
 
-### 2. **PostgreSQL**
+### 2. **Banco de dados PostgreSQL**
 
 Para este contexto e propósito, usarei o PostgreSQL como banco de dados relacional.
 
-> Embora eu seja entusiasta e arquiteto de soluções NoSQL em dados na RavenDB.
+> Embora eu seja entusiasta e arquiteto de soluções NoSQL em dados na **RavenDB**, este exemplo servirá como uma boa comparação.
 
 #### 2.1 **Faça o Download e execute o PostgreSQL caso for rodar o projeto na sua máquina local**
 
-Baixe o PostgreSQL do [site oficial](https://www.postgresql.org/download/) caso vá executar isso localmente. Inicie o serviço.
-Baixe também o pgAdmin Tool para facilitar a administração do banco de dados.
+Baixe o PostgreSQL do [site oficial](https://www.postgresql.org/download/) e faça a instalação necessária para usar localmente.
+Inicie o serviço no gerenciador de Serviços do Windows.
+
+> Baixe também o pgAdmin Tool para facilitar a administração do banco de dados.
 
 #### 2.2 **Iniciando o serviço do PostgreSQL no Windows**
 
 Depois de todos os passos da instalação e reiniciar o computador, você precisa iniciar o servio do PostgreSQL service.
-Você pode fazer isso executando  ocomando abaixo do seu terminal (garanta que esteja executando como Administrador) ou abra o gerenciador de serviços do Windows e inicie com botão direito, o serviço do PostgreSQL:
+Você pode fazer isso executando o comando abaixo do seu terminal (garanta que esteja executando como Administrador) ou abra o gerenciador de serviços do Windows e inicie com botão direito, o serviço do PostgreSQL:
 
 ```bash
 net start postgresql-x64-13
@@ -83,7 +97,7 @@ Use o comando abaixo diretamente no Console ou use o comando de executar na sua 
 dotnet run
 ```
 
-Swagger deve ser exibir sob a URL `https://localhost:5001/swagger/index.html` ou `http://localhost:5000/swagger/index.html` dependendo da sua configuração.
+Swagger deve ser exibir sob a URL `https://localhost:7077/swagger/index.html` ou `http://localhost:5205/swagger/index.html` dependendo da sua configuração `http` ou `https`.
 
 > O ambiente será informado no título do Swagger.
 

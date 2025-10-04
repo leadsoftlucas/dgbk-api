@@ -1,3 +1,4 @@
+using LeadSoft.Common.Library.EnvUtils;
 using LucasRT.DGBK.RestApi.Application.Services;
 using LucasRT.DGBK.RestApi.Configurations;
 using LucasRT.DGBK.RestApi.Infrastructure.Data;
@@ -31,7 +32,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", $"RavenDB Sales Assistant Demo");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", $"DGBK Rest Api - {EnvUtil.Get(EnvUtil.AspNet)} - PostgreSQL");
         c.InjectStylesheet("/swagger-ui/SwaggerDark.css");
         c.DocExpansion(DocExpansion.None);
         c.DefaultModelExpandDepth(2);
