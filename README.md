@@ -27,53 +27,23 @@ Você deve configurar as variáveis de ambiente para que a aplicação seja exec
 }
 ```
 
-### 2. **PostgreSQL**
+### 2. **RavenDB**
 
-Para este contexto e propósito, usarei o PostgreSQL como banco de dados relacional.
+Como sou entusiasta do RavenDB, esta é a versão do mesmo projeto, mas usando **RavenDB** para voar alto ao invés de pesar como um elefante!
 
-> Embora eu seja entusiasta e arquiteto de soluções NoSQL em dados na RavenDB.
+#### 2.1 **Faça o Download e execute o RavenDB caso for rodar o projeto na sua máquina local**
 
-#### 2.1 **Faça o Download e execute o PostgreSQL caso for rodar o projeto na sua máquina local**
+Baixe o RavenDB do [site oficial](https://ravendb.net/download/) caso vá executar isso localmente.
+Inicie o serviço, o Raven Studio inicializará automaticamente a configuração do cluster e iniciar quandi finalizar, poderá utiliza-lo no seu Browser.
 
-Baixe o PostgreSQL do [site oficial](https://www.postgresql.org/download/) caso vá executar isso localmente. Inicie o serviço.
-Baixe também o pgAdmin Tool para facilitar a administração do banco de dados.
+#### 2.2 **Conecte à sua base de dados**
 
-#### 2.2 **Iniciando o serviço do PostgreSQL no Windows**
-
-Depois de todos os passos da instalação e reiniciar o computador, você precisa iniciar o servio do PostgreSQL service.
-Você pode fazer isso executando  ocomando abaixo do seu terminal (garanta que esteja executando como Administrador) ou abra o gerenciador de serviços do Windows e inicie com botão direito, o serviço do PostgreSQL:
-
-```bash
-net start postgresql-x64-13
-```
-
-Após instalar o pgAdmin, abra-o e crie uma nova base de dados chamada `DGBK` ou qualquer outro nome que preferir.
-
-#### 2.2.1 **Configure o Entity Framework Core no seu projeto para instalar as Migrations**
-
-Instale o Entity Framework Core tools no seu projeto para gerenciar as migrations e atualizações do banco de dados. Você pode fazer isso executando o comando abaixo no seu terminal:
-
-```bash
-dotnet tool install --global dotnet-ef
-```
-
-#### 2.2.2 **Conecte à sua base de dados**
-
-Abra o AppSettings de desenvolvimento `LucasRT.DGBK.RestApi/appsettings.development.json` e configure a propriedade `ConnectionStrings` com a string de conexão do PostgreSQL:
+Abra o AppSettings de desenvolvimento `LucasRT.DGBK.RestApi/appsettings.development.json` e configure a propriedade `RavenSettings` com a configuração do cluster RavenDB abaixo:
 
 ```json
-"ConnectionStrings": {
-  "PostgreSQL": "Host=localhost;Port=5432;Database=DGBK;Username=postgres;Password=admin;"
+"": {
+  "": ""
 }
-```
-
-#### 2.2.3 **Configurando ambiente de banco de dados para a aplicação**
-
-Execute o comando abaixo para criar a migration inicial que criará as tabelas das Entidades na sua camada de Domínio:
-
-```bash	
- dotnet ef migrations add InitialMigration -p LucasRT.DGBK.RestApi
- dotnet ef database update -p LucasRT.DGBK.RestApi
 ```
 
 ### 3. **Executar a aplicação **

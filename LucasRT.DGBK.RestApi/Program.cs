@@ -1,8 +1,6 @@
 using LucasRT.DGBK.RestApi.Application.Services;
 using LucasRT.DGBK.RestApi.Configurations;
-using LucasRT.DGBK.RestApi.Infrastructure.Data;
 using LucasRT.DGBK.RestApi.Workers;
-using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -49,10 +47,6 @@ app.UseHttpsRedirection();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseRouting();
-
-using var scope = app.Services.CreateScope();
-var db = scope.ServiceProvider.GetRequiredService<PostgreSQL>();
-db.Database.Migrate();
 
 app.MapControllers();
 
