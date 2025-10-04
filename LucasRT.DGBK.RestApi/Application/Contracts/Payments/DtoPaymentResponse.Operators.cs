@@ -1,4 +1,5 @@
-﻿using LucasRT.DGBK.RestApi.Domain.Entities.Payments;
+﻿using LeadSoft.Common.Library.Extensions;
+using LucasRT.DGBK.RestApi.Domain.Entities.Payments;
 
 namespace LucasRT.DGBK.RestApi.Application.Contracts.Payments
 {
@@ -11,7 +12,7 @@ namespace LucasRT.DGBK.RestApi.Application.Contracts.Payments
 
             return new DtoPaymentResponse
             {
-                Id = payment.Id,
+                Id = payment.Id.ToGuid(),
                 TransactionId = payment.TransactionId,
                 PixKey = payment.PixKey,
                 Amount = payment.Amount,

@@ -1,4 +1,5 @@
-﻿using LucasRT.DGBK.RestApi.Domain.Entities.Refunds;
+﻿using LeadSoft.Common.Library.Extensions;
+using LucasRT.DGBK.RestApi.Domain.Entities.Refunds;
 
 namespace LucasRT.DGBK.RestApi.Application.Contracts.Refunds
 {
@@ -11,14 +12,12 @@ namespace LucasRT.DGBK.RestApi.Application.Contracts.Refunds
 
             return new DtoRefundResponse
             {
-                Id = refund.Id,
+                Id = refund.Id.ToGuid(),
                 PaymentId = refund.PaymentId,
                 CompletedAt = refund.CompletedAt,
                 CreatedAt = refund.CreatedAt,
                 RefundStatus = refund.Status,
-                PaymentAmount = refund.Payment.Amount,
                 RefundAmount = refund.Amount,
-                RemainingAmount = refund.Payment.Amount - refund.Payment.RefundedAmount,
             };
         }
     }

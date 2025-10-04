@@ -4,6 +4,59 @@
         <name>LucasRT.DGBK.RestApi</name>
     </assembly>
     <members>
+        <member name="T:LucasRT.DGBK.RestApi.Configurations.RavenDBConfiguration">
+            <summary>
+            Provides configuration methods for setting up RavenDB subscriptions for processing payments and refunds.
+            </summary>
+            <remarks>This static class contains methods to add and manage subscriptions in a RavenDB document store for
+            handling payment and refund events. It includes constants for webhook headers and subscription names used in the
+            processing logic. The class ensures that necessary subscriptions are created if they do not already exist and
+            manages the execution of subscription workers. <see cref="!:https://docs.ravendb.net/7.1/studio/database/tasks/ongoing-tasks/subscription-task/"/></remarks>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Configurations.RavenDBConfiguration.AddPaymentsSubscription(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds a subscription for processing payment records to the service collection.
+            </summary>
+            <remarks>This method checks for the existence of a subscription named "PaymentsWorker" in the
+            RavenDB document store. If the subscription does not exist, it creates a new one with a filter to process
+            payments with a status of either <see cref="F:LucasRT.DGBK.RestApi.Domain.ValuedObjects.Enums.PaymentStatus.Created"/> or <see cref="F:LucasRT.DGBK.RestApi.Domain.ValuedObjects.Enums.PaymentStatus.Failed"/>
+            and a <c>NextAttemptAt</c> date that is either null or in the past.</remarks>
+            <param name="service">The service collection to which the payment subscription is added.</param>
+            <returns></returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if the RavenDB document store is not found in the service collection.</exception>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Configurations.RavenDBConfiguration.PaymentsSubcriptionWorker(Raven.Client.Documents.IDocumentStore)">
+            <summary>
+            Processes payments using a subscription worker that listens for payment events from a RavenDB instance.
+            </summary>
+            <remarks>This method sets up a subscription worker to process payment events. For each payment
+            event, it sends a POST request to a configured webhook endpoint with the payment details. If the request is
+            successful, the payment is captured; otherwise, a retry is scheduled. The method handles exceptions by
+            scheduling a retry for the payment.</remarks>
+            <param name="ravenDB">The RavenDB document store used to access the subscription worker.</param>
+            <returns></returns>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Configurations.RavenDBConfiguration.AddRefundsSubscription(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds a subscription for processing refund events to the service collection.
+            </summary>
+            <remarks>This method checks for the existence of a subscription named "RefundsWorker" in the
+            RavenDB document store. If the subscription does not exist, it creates a new one with specified filtering
+            and inclusion criteria.</remarks>
+            <param name="service">The service collection to which the refund subscription will be added.</param>
+            <returns></returns>
+            <exception cref="T:System.OperationCanceledException">Thrown if the RavenDB Document Store is not found in the service collection.</exception>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Configurations.RavenDBConfiguration.RefundsSubcriptionWorker(Raven.Client.Documents.IDocumentStore)">
+            <summary>
+            Processes refund subscriptions by executing refund operations for payments that meet specific criteria.
+            </summary>
+            <remarks>This method runs a subscription worker that listens for refund events and processes
+            them by sending HTTP requests to a configured webhook endpoint. It updates the status of refunds and
+            payments based on the response from the webhook. If a refund fails, it schedules a retry.</remarks>
+            <param name="ravenDB">The document store used to access the database for retrieving and updating refund and payment information.</param>
+            <returns></returns>
+        </member>
         <member name="T:LucasRT.DGBK.RestApi.Configurations.SwaggerConfiguration">
             <summary>
             Provides extension methods for configuring Swagger in an ASP.NET Core application.
@@ -21,6 +74,159 @@
             contact information. Additionally, it includes XML comments for API documentation, enables annotations, and
             customizes schema IDs.</remarks>
             <param name="services">The <see cref="T:Microsoft.Extensions.DependencyInjection.IServiceCollection"/> to which Swagger services will be added.</param>
+        </member>
+        <member name="T:LucasRT.DGBK.RestApi.Controllers.PaymentsController">
+            <summary>
+            Provides endpoints for creating, retrieving, and searching payment orders.
+            </summary>
+            <remarks>The <see cref="T:LucasRT.DGBK.RestApi.Controllers.PaymentsController"/> class is responsible for handling HTTP requests related
+            to payment operations. It supports creating new payment orders in an idempotent manner, retrieving payment
+            details by identifier, and listing payments with optional status filtering.</remarks>
+            <param name="payments"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Controllers.PaymentsController.#ctor(LucasRT.DGBK.RestApi.Application.Services.Interfaces.Payments.IPaymentService,Microsoft.Extensions.Logging.ILogger{LucasRT.DGBK.RestApi.Controllers.PaymentsController})">
+            <summary>
+            Provides endpoints for creating, retrieving, and searching payment orders.
+            </summary>
+            <remarks>The <see cref="T:LucasRT.DGBK.RestApi.Controllers.PaymentsController"/> class is responsible for handling HTTP requests related
+            to payment operations. It supports creating new payment orders in an idempotent manner, retrieving payment
+            details by identifier, and listing payments with optional status filtering.</remarks>
+            <param name="payments"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Controllers.PaymentsController.PostPaymentAsync(System.Guid,LucasRT.DGBK.RestApi.Application.Contracts.Payments.DtoPaymentRequest)">
+            <summary>
+            Creates a new payment order in an idempotent manner.
+            </summary>
+            <remarks>This method is idempotent, meaning that multiple identical requests will have the
+            same effect as a single request. It is important to provide a unique <paramref name="IdempotencyKey"/> for
+            each new payment attempt to avoid duplicate transactions.</remarks>
+            <param name="IdempotencyKey">A unique identifier for the request to ensure idempotency. This key must be provided in the request header.</param>
+            <param name="dtoRequest">The payment request details, including transfer data, provided in the request body.</param>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult`1"/> containing a <see cref="T:LucasRT.DGBK.RestApi.Application.Contracts.Payments.DtoPaymentResponse"/> object.  Returns a 200 OK
+            status if the payment already exists, or a 201 Created status if a new payment is successfully created.</returns>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Controllers.PaymentsController.GetPaymentAsync(System.Guid)">
+            <summary>
+            Retrieves the payment details for a specified payment identifier.
+            </summary>
+            <remarks>This method returns a 200 OK response with the payment details if the payment is
+            found, a 404 Not Found response if the payment does not exist, or a 400 Bad Request response if the request
+            is malformed.</remarks>
+            <param name="id">The unique identifier of the payment to retrieve. Must be a valid GUID.</param>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult`1"/> containing a <see cref="T:LucasRT.DGBK.RestApi.Application.Contracts.Payments.DtoPaymentResponse"/> if the payment is found;
+            otherwise, a <see cref="T:Microsoft.AspNetCore.Mvc.NotFoundResult"/> if the payment does not exist.</returns>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Controllers.PaymentsController.GetPaymentsAsync(System.Nullable{LucasRT.DGBK.RestApi.Domain.ValuedObjects.Enums.PaymentStatus})">
+            <summary>
+            Retrieves a list of payments, optionally filtered by payment status.
+            </summary>
+            <remarks>This method returns a 200 OK response with the list of payments. If no payments match
+            the specified status, an empty list is returned.</remarks>
+            <param name="paymentStatus">An optional filter to specify the status of payments to retrieve. If null, all payments are returned.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains an <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult`1"/>
+            with a list of <see cref="T:LucasRT.DGBK.RestApi.Application.Contracts.Payments.DtoPaymentResponse"/> objects representing the payments.</returns>
+        </member>
+        <member name="T:LucasRT.DGBK.RestApi.Controllers.RefundsController">
+            <summary>
+            Provides endpoints for managing refund operations, including creating, retrieving, and listing refunds.
+            </summary>
+            <remarks>The <see cref="T:LucasRT.DGBK.RestApi.Controllers.RefundsController"/> class is responsible for handling HTTP requests related
+            to refund operations. It allows clients to initiate refund requests, retrieve specific refund details by ID, and
+            list refunds with optional filtering by status.</remarks>
+            <param name="refunds"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Controllers.RefundsController.#ctor(LucasRT.DGBK.RestApi.Application.Services.Interfaces.Refunds.IRefundService,Microsoft.Extensions.Logging.ILogger{LucasRT.DGBK.RestApi.Controllers.RefundsController})">
+            <summary>
+            Provides endpoints for managing refund operations, including creating, retrieving, and listing refunds.
+            </summary>
+            <remarks>The <see cref="T:LucasRT.DGBK.RestApi.Controllers.RefundsController"/> class is responsible for handling HTTP requests related
+            to refund operations. It allows clients to initiate refund requests, retrieve specific refund details by ID, and
+            list refunds with optional filtering by status.</remarks>
+            <param name="refunds"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Controllers.RefundsController.PostRefundAsync(LucasRT.DGBK.RestApi.Application.Contracts.Refunds.DtoRefundRequest)">
+            <summary>
+            Initiates a refund request for a specified payment.
+            </summary>
+            <remarks>This method processes a refund request by creating a refund order for the specified
+            payment.  It returns a 200 OK status with the refund details if successful, or an appropriate error status
+            if the request cannot be processed.</remarks>
+            <param name="dtoRequest">The refund request details encapsulated in a <see cref="T:LucasRT.DGBK.RestApi.Application.Contracts.Refunds.DtoRefundRequest"/> object. This parameter cannot be
+            null.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains a <see
+            cref="T:LucasRT.DGBK.RestApi.Application.Contracts.Refunds.DtoRefundResponse"/> object with the details of the processed refund request.</returns>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Controllers.RefundsController.GetRefundAsync(System.Guid)">
+            <summary>
+            Retrieves the refund details for the specified refund identifier.
+            </summary>
+            <remarks>This method returns a 200 OK response with the refund details if the refund is found,
+            a 404 Not Found response if the refund does not exist, or a 400 Bad Request response if the input is
+            invalid.</remarks>
+            <param name="id">The unique identifier of the refund to retrieve. Must be a valid GUID.</param>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult`1"/> containing a <see cref="T:LucasRT.DGBK.RestApi.Application.Contracts.Refunds.DtoRefundResponse"/> if the refund is found;
+            otherwise, a <see cref="T:Microsoft.AspNetCore.Mvc.NotFoundResult"/> if no refund exists for the specified identifier.</returns>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Controllers.RefundsController.GetRefundsAsync(System.Nullable{LucasRT.DGBK.RestApi.Domain.ValuedObjects.Enums.RefundStatus})">
+            <summary>
+            Retrieves a list of refunds, optionally filtered by refund status.
+            </summary>
+            <remarks>This method supports querying refunds based on their status, allowing clients to
+            retrieve only those refunds that match the specified criteria. If no status is provided, the method returns
+            all available refunds.</remarks>
+            <param name="refundStatus">An optional parameter to filter the refunds by their status. If <see langword="null"/>, all refunds are
+            returned.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains an <see cref="T:Microsoft.AspNetCore.Mvc.ActionResult`1"/>
+            with a list of <see cref="T:LucasRT.DGBK.RestApi.Application.Contracts.Refunds.DtoRefundResponse"/> objects representing the refunds.</returns>
+        </member>
+        <member name="T:LucasRT.DGBK.RestApi.Controllers.WebhooksController">
+            <summary>
+            Provides endpoints for simulating webhook interactions, including payment and refund processing.
+            </summary>
+            <remarks>This controller is designed to simulate external API interactions for testing purposes. It
+            includes endpoints for processing payment and refund requests, validating HMAC signatures, and generating random
+            outcomes to mimic real-world scenarios. The controller requires specific headers for authentication and
+            processes requests based on the provided data transfer objects.</remarks>
+            <param name="logger"></param>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Controllers.WebhooksController.#ctor(Microsoft.Extensions.Logging.ILogger{LucasRT.DGBK.RestApi.Controllers.WebhooksController})">
+            <summary>
+            Provides endpoints for simulating webhook interactions, including payment and refund processing.
+            </summary>
+            <remarks>This controller is designed to simulate external API interactions for testing purposes. It
+            includes endpoints for processing payment and refund requests, validating HMAC signatures, and generating random
+            outcomes to mimic real-world scenarios. The controller requires specific headers for authentication and
+            processes requests based on the provided data transfer objects.</remarks>
+            <param name="logger"></param>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Controllers.WebhooksController.PostProcessPayment(LucasRT.DGBK.RestApi.Application.Contracts.Webhooks.DtoProcessPaymentRequest)">
+            <summary>
+            Processes a payment request by validating the HMAC signature and simulating a payment response.
+            </summary>
+            <remarks>This method simulates the processing of a payment by generating a random outcome.  It
+            requires a valid HMAC signature and timestamp in the request headers to proceed.</remarks>
+            <param name="dtoRequest">The payment request data transfer object containing payment details.</param>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> indicating the result of the payment processing.  Returns <see
+            cref="F:Microsoft.AspNetCore.Http.StatusCodes.Status200OK"/> for a successful payment,  <see cref="F:Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest"/>
+            for a malformed request,  <see cref="F:Microsoft.AspNetCore.Http.StatusCodes.Status411LengthRequired"/> if required headers are missing,
+            <see cref="F:Microsoft.AspNetCore.Http.StatusCodes.Status422UnprocessableEntity"/> for an invalid signature,  or <see
+            cref="F:Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError"/> for an unexpected error.</returns>
+        </member>
+        <member name="M:LucasRT.DGBK.RestApi.Controllers.WebhooksController.PostProcessRefund(LucasRT.DGBK.RestApi.Application.Contracts.Webhooks.DtoProcessRefundRequest)">
+            <summary>
+            Processes a refund request by validating the HMAC signature and simulating a refund response.
+            </summary>
+            <remarks>This method simulates the processing of a refund request by generating a random
+            outcome.  It requires a valid HMAC signature and timestamp in the request headers to proceed.</remarks>
+            <param name="dtoRequest">The refund request data transfer object containing the refund details to be processed.</param>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> representing the result of the refund processing.  Returns a 200 OK status
+            for a successful refund, 400 Bad Request for invalid input,  411 Length Required if required headers are
+            missing, 422 Unprocessable Entity for an invalid signature,  or 500 Internal Server Error for unexpected
+            conditions.</returns>
         </member>
         <member name="T:LucasRT.DGBK.RestApi.Infrastructure.HmacSigner">
             <summary>
@@ -57,18 +263,6 @@
             <param name="a">The first string to compare. Must not be null.</param>
             <param name="b">The second string to compare. Must not be null.</param>
             <returns><see langword="true"/> if the strings are equal; otherwise, <see langword="false"/>.</returns>
-        </member>
-        <member name="T:LucasRT.DGBK.RestApi.Migrations.InitialMigration">
-            <inheritdoc />
-        </member>
-        <member name="M:LucasRT.DGBK.RestApi.Migrations.InitialMigration.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:LucasRT.DGBK.RestApi.Migrations.InitialMigration.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
-            <inheritdoc />
-        </member>
-        <member name="M:LucasRT.DGBK.RestApi.Migrations.InitialMigration.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
-            <inheritdoc />
         </member>
     </members>
 </doc>

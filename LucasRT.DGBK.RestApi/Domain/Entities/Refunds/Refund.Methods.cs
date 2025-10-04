@@ -1,4 +1,5 @@
-﻿using LucasRT.DGBK.RestApi.Domain.Entities.Payments;
+﻿using LeadSoft.Common.Library.Extensions;
+using LucasRT.DGBK.RestApi.Domain.Entities.Payments;
 using static LucasRT.DGBK.RestApi.Domain.ValuedObjects.Enums;
 
 namespace LucasRT.DGBK.RestApi.Domain.Entities.Refunds
@@ -11,10 +12,8 @@ namespace LucasRT.DGBK.RestApi.Domain.Entities.Refunds
 
         public Refund(Payment payment, decimal amount)
         {
-            Id = Guid.NewGuid();
-            PaymentId = payment.Id;
+            PaymentId = payment.Id.ToGuid();
             Amount = amount < payment.Amount ? amount : payment.Amount;
-            Payment = payment;
         }
 
         public Refund MarkFailed()

@@ -1,4 +1,5 @@
-﻿using LeadSoft.Common.Library.Extensions;
+﻿using LeadSoft.Common.Library.EnvUtils;
+using LeadSoft.Common.Library.Extensions;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -28,13 +29,13 @@ namespace LucasRT.DGBK.RestApi.Configurations
                  {
                      c.SwaggerDoc("v1", new OpenApiInfo
                      {
-                         Title = $"DGBK Rest Api",
+                         Title = $"DGBK Rest Api - {EnvUtil.Get(EnvUtil.AspNet)} - RavenDB",
                          Version = "v1",
                          Description = Assembly.GetExecutingAssembly().GetEmbeddedResourceContent($"README.md", true),
                          Contact = new OpenApiContact
                          {
                              Name = "Lucas Tavares",
-                             Email = "lucas@leadsoft.inf.br"
+                             Email = "lucas.tavares@ravendb.net"
                          }
                      });
 

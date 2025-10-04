@@ -1,11 +1,13 @@
+using LeadSoft.Common.Library.EnvUtils;
 using LucasRT.DGBK.RestApi.Application.Services;
 using LucasRT.DGBK.RestApi.Configurations;
-using LucasRT.DGBK.RestApi.Workers;
 using Swashbuckle.AspNetCore.SwaggerUI;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddPostgreSQL(builder.Configuration);
+builder.Services.AddRavenDB(builder.Configuration);
+await builder.Services.AddPaymentsSubscription();
+await builder.Services.AddRefundsSubscription();
 
 builder.Services.AddControllersConfig();
 builder.Services.AddHttpContextAccessor();
@@ -18,9 +20,6 @@ builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddServices();
 
-builder.Services.AddHostedService<PaymentWebhookDeliveryWorker>();
-builder.Services.AddHostedService<RefundWebhookDeliveryWorker>();
-
 WebApplication app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -29,7 +28,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", $"RavenDB Sales Assistant Demo");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", $"DGBK Rest Api - {EnvUtil.Get(EnvUtil.AspNet)} - RavenDB");
         c.InjectStylesheet("/swagger-ui/SwaggerDark.css");
         c.DocExpansion(DocExpansion.None);
         c.DefaultModelExpandDepth(2);

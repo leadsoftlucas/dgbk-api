@@ -11,16 +11,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Infrastructure\Certificates\LucasDGBK.pfx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="LeadSoft.Common.GlobalDomain" Version="9.2.25" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.9" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="RavenDB.Client" Version="7.1.3" />
+    <PackageReference Include="RavenDB.DependencyInjection" Version="5.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.6" />
   </ItemGroup>
@@ -30,6 +29,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </EmbeddedResource>
+    <EmbeddedResource Include="Infrastructure\Certificates\LucasDGBK.pfx" />
   </ItemGroup>
 
   <ItemGroup>

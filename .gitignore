@@ -378,3 +378,4 @@ FodyWeavers.xsd
 
 # JetBrains Config IDE files
 .idea
+/LucasRT.DGBK.RestApi/Infrastructure/Certificates/LucasDGBK.pfx

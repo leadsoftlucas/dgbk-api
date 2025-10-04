@@ -12,7 +12,6 @@ namespace LucasRT.DGBK.RestApi.Domain.Entities.Payments
 
         public Payment(string pixKey, decimal amount, Guid transactionId)
         {
-            Id = Guid.NewGuid();
             TransactionId = transactionId;
             PixKey = pixKey;
             Amount = amount;
@@ -75,13 +74,12 @@ namespace LucasRT.DGBK.RestApi.Domain.Entities.Payments
             PaymentStatusHistory sh = new()
             {
                 Id = Guid.NewGuid(),
-                PaymentId = this.Id,
                 Status = status,
                 Reason = reason,
                 At = DateTimeOffset.UtcNow
             };
 
-            _history.Add(sh);
+            History.Add(sh);
 
             return sh;
         }

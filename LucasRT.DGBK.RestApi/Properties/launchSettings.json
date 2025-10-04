@@ -10,7 +10,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "HMAC": "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ",
-        "WEBHOOK_ENDPOINT": "http://localhost:5205/api/"
+        "WEBHOOK_ENDPOINT": "http://localhost:5205/api/",
+        "RAVENDB_PASSWORD": "LucasDGBK"
       }
     },
     "https": {
@@ -22,7 +23,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "HMAC": "bGoa+V7g/yqDXvKRqq+JTFn4uQZbPiQJo4pf9RzJ",
-        "WEBHOOK_ENDPOINT": "https://localhost:7077/api/"
+        "WEBHOOK_ENDPOINT": "https://localhost:7077/api/",
+        "RAVENDB_PASSWORD": "LucasDGBK"
       }
     }
   }
